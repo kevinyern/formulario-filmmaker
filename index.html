@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BAF PRO — Formulario de Acceso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080808;
+      --surface: #0f0f0f;
+      --border: #1e1e1e;
+      --border-active: #3a3a3a;
+      --text: #e8e2d9;
+      --muted: #555;
+      --accent: #3b82f6;
+      --accent-dark: #1d4ed8;
+      --white: #ffffff;
+      --error: #c0392b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.6;
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px 80px;
+      position: relative;
+      text-align: center;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 80px;
+      background: linear-gradient(to bottom, transparent, var(--border));
+    }
+
+    .badge {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent-dark);
+      padding: 6px 16px;
+      margin-bottom: 48px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s ease forwards;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(64px, 14vw, 160px);
+      line-height: 0.9;
+      letter-spacing: 0.02em;
+      color: var(--white);
+      margin-bottom: 32px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.4s ease forwards;
+    }
+
+    .hero-title span {
+      color: var(--accent);
+      display: block;
+    }
+
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 18px);
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 480px;
+      line-height: 1.7;
+      margin-bottom: 56px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.6s ease forwards;
+    }
+
+    .hero-sub strong {
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--accent);
+      padding: 16px 40px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.8s ease forwards;
+      cursor: pointer;
+      border: none;
+    }
+
+    .cta-btn:hover {
+      background: #e8bc66;
+      transform: translateY(-2px);
+    }
+
+    /* Ticker */
+    .ticker-wrap {
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      background: var(--surface);
+    }
+
+    .ticker-track {
+      display: flex;
+      gap: 0;
+      animation: ticker 22s linear infinite;
+      width: max-content;
+    }
+
+    .ticker-item {
+      white-space: nowrap;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      padding: 0 32px;
+    }
+
+    .ticker-item span {
+      color: var(--accent);
+      margin-right: 32px;
+    }
+
+    /* Form section */
+    .form-section {
+      padding: 100px 24px 120px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(40px, 7vw, 72px);
+      line-height: 0.95;
+      color: var(--white);
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 64px;
+    }
+
+    /* Form */
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .form-step {
+      display: flex;
+      gap: 24px;
+      padding: 36px 0;
+      border-bottom: 1px solid var(--border);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .form-step.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .step-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      color: var(--border-active);
+      line-height: 1;
+      min-width: 32px;
+      padding-top: 4px;
+      transition: color 0.3s;
+    }
+
+    .form-step:focus-within .step-num {
+      color: var(--accent);
+    }
+
+    .step-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .step-label {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: 0.01em;
+      line-height: 1.4;
+    }
+
+    .step-hint {
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    textarea {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 300;
+      padding: 10px 0;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="tel"]:focus,
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--border-active);
+    }
+
+    textarea {
+      resize: none;
+      min-height: 80px;
+      line-height: 1.6;
+    }
+
+    /* Radio / select facturación */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .radio-option:hover {
+      border-color: var(--border-active);
+    }
+
+    .radio-option input[type="radio"] {
+      display: none;
+    }
+
+    .radio-dot {
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--border-active);
+      border-radius: 50%;
+      flex-shrink: 0;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+
+    .radio-dot::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .radio-option input[type="radio"]:checked ~ .radio-dot {
+      border-color: var(--accent);
+    }
+
+    .radio-option input[type="radio"]:checked ~ .radio-dot::after {
+      opacity: 1;
+    }
+
+    .radio-option.selected {
+      border-color: var(--accent-dark);
+      background: rgba(212, 168, 83, 0.04);
+    }
+
+    .radio-label {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--text);
+    }
+
+    .otro-input {
+      margin-top: 8px;
+    }
+
+    /* Submit */
+    .submit-area {
+      padding-top: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .submit-note {
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .submit-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--accent);
+      padding: 18px 48px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .submit-btn:hover {
+      background: #e8bc66;
+      transform: translateY(-2px);
+    }
+
+    .submit-btn:disabled {
+      background: var(--border-active);
+      color: var(--muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Success state */
+    .success-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      text-align: center;
+      gap: 24px;
+      padding: 60px 24px;
+    }
+
+    .success-screen.active {
+      display: flex;
+    }
+
+    .success-icon {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 80px;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .success-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(40px, 7vw, 72px);
+      color: var(--white);
+      line-height: 0.95;
+    }
+
+    .success-msg {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 400px;
+      line-height: 1.7;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* Error */
+    .field-error {
+      font-size: 11px;
+      color: var(--error);
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    input.invalid,
+    textarea.invalid {
+      border-color: var(--error) !important;
+    }
+
+    @media (max-width: 480px) {
+      .form-step { gap: 16px; }
+      .step-num { font-size: 24px; min-width: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="badge">Plazas Limitadas · BAF PRO</div>
+    <h1 class="hero-title">
+      ¿LISTO PARA<br>
+      <span>EL SIGUIENTE</span>
+      NIVEL?
+    </h1>
+    <p class="hero-sub">
+      Antes de hablar, necesito conocerte.<br>
+      <strong>Rellena el formulario</strong> y te contacto personalmente.
+    </p>
+    <button class="cta-btn" onclick="document.getElementById('formulario').scrollIntoView({behavior:'smooth'})">
+      Empezar ahora
+    </button>
+  </section>
+
+  <!-- Ticker -->
+  <div class="ticker-wrap">
+    <div class="ticker-track">
+      <div class="ticker-item"><span>·</span> RED BULL</div>
+      <div class="ticker-item"><span>·</span> HYROX</div>
+      <div class="ticker-item"><span>·</span> ILIA TOPURIA</div>
+      <div class="ticker-item"><span>·</span> OMAR MONTES</div>
+      <div class="ticker-item"><span>·</span> KIDD KEO</div>
+      <div class="ticker-item"><span>·</span> FRANCO DE VITA</div>
+      <div class="ticker-item"><span>·</span> RED BULL</div>
+      <div class="ticker-item"><span>·</span> HYROX</div>
+      <div class="ticker-item"><span>·</span> ILIA TOPURIA</div>
+      <div class="ticker-item"><span>·</span> OMAR MONTES</div>
+      <div class="ticker-item"><span>·</span> KIDD KEO</div>
+      <div class="ticker-item"><span>·</span> FRANCO DE VITA</div>
+    </div>
+  </div>
+
+  <!-- Form section -->
+  <section class="form-section" id="formulario">
+    <div class="section-label">Acceso al programa</div>
+    <h2 class="section-title">CUÉNTAME<br>TODO.</h2>
+    <p class="section-desc">
+      No es un formulario genérico. Es el primer paso real.<br>
+      Tómate tu tiempo.
+    </p>
+
+    <form class="form" id="mainForm" novalidate>
+
+      <!-- 1. Nombre -->
+      <div class="form-step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <label class="step-label" for="nombre">¿Cómo te llamas?</label>
+          <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" autocomplete="name" />
+          <div class="field-error" id="err-nombre"></div>
+        </div>
+      </div>
+
+      <!-- 2. Teléfono -->
+      <div class="form-step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <label class="step-label" for="telefono">Número de teléfono</label>
+          <span class="step-hint">Incluye el prefijo de tu país, ej: +34 612 345 678</span>
+          <input type="tel" id="telefono" name="telefono" placeholder="+34 600 000 000" autocomplete="tel" />
+          <div class="field-error" id="err-telefono"></div>
+        </div>
+      </div>
+
+      <!-- 3. Objetivo -->
+      <div class="form-step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <label class="step-label" for="objetivo">¿Cuál es tu principal objetivo o meta dentro del mundo del filmmaking?</label>
+          <textarea id="objetivo" name="objetivo" placeholder="Escribe aquí con total honestidad..."></textarea>
+          <div class="field-error" id="err-objetivo"></div>
+        </div>
+      </div>
+
+      <!-- 4. Frenos -->
+      <div class="form-step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <label class="step-label" for="frenos">¿Qué es lo que más te ha frenado hasta ahora para vivir de esto?</label>
+          <textarea id="frenos" name="frenos" placeholder="Sé específico, no hay respuesta incorrecta..."></textarea>
+          <div class="field-error" id="err-frenos"></div>
+        </div>
+      </div>
+
+      <!-- 5. Facturación -->
+      <div class="form-step">
+        <div class="step-num">05</div>
+        <div class="step-content">
+          <label class="step-label">¿Cuál es tu facturación aproximada actualmente?</label>
+          <div class="radio-group" id="facturacion-group">
+            <label class="radio-option">
+              <input type="radio" name="facturacion" value="menos500" />
+              <span class="radio-dot"></span>
+              <span class="radio-label">Menos de 500€/mes</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="facturacion" value="500-1000" />
+              <span class="radio-dot"></span>
+              <span class="radio-label">Entre 500 y 1.000€/mes</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="facturacion" value="1000-2000" />
+              <span class="radio-dot"></span>
+              <span class="radio-label">Entre 1.000 y 2.000€/mes</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="facturacion" value="mas2000" />
+              <span class="radio-dot"></span>
+              <span class="radio-label">+2.000€/mes</span>
+            </label>
+            <label class="radio-option" id="otro-option">
+              <input type="radio" name="facturacion" value="otro" />
+              <span class="radio-dot"></span>
+              <span class="radio-label">Otro</span>
+            </label>
+          </div>
+          <div id="otro-container" style="display:none;" class="otro-input">
+            <input type="text" id="facturacion-otro" name="facturacion-otro" placeholder="Especifica tu situación..." />
+          </div>
+          <div class="field-error" id="err-facturacion"></div>
+        </div>
+      </div>
+
+      <!-- 6. Mejoras -->
+      <div class="form-step">
+        <div class="step-num">06</div>
+        <div class="step-content">
+          <label class="step-label" for="mejoras">¿Qué aspectos de tu trabajo crees que necesitan mejoras para alcanzar el siguiente nivel en calidad?</label>
+          <textarea id="mejoras" name="mejoras" placeholder="Técnica, narrativa, clientes, precios, marca personal..."></textarea>
+          <div class="field-error" id="err-mejoras"></div>
+        </div>
+      </div>
+
+      <div class="submit-area">
+        <p class="submit-note">
+          Tus respuestas son confidenciales. Kevin las leerá personalmente<br>antes de contactarte.
+        </p>
+        <button type="submit" class="submit-btn" id="submitBtn">
+          Enviar solicitud →
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Success -->
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">✓</div>
+      <h2 class="success-title">SOLICITUD<br>RECIBIDA.</h2>
+      <p class="success-msg">
+        Kevin revisará tus respuestas y se pondrá en contacto contigo en las próximas 24–48 horas.
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>@kevinyern · <a href="https://beafilmmaker.pro" target="_blank">beafilmmaker.pro</a></p>
+  </footer>
+
+  <script>
+    // Intersection Observer for form steps
+    const steps = document.querySelectorAll('.form-step');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('visible');
+      });
+    }, { threshold: 0.15 });
+    steps.forEach(s => observer.observe(s));
+
+    // Radio visual feedback
+    document.querySelectorAll('.radio-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const group = opt.closest('.radio-group');
+        group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        // Toggle "otro" field
+        const val = opt.querySelector('input[type="radio"]').value;
+        const container = document.getElementById('otro-container');
+        if (val === 'otro') {
+          container.style.display = 'block';
+          document.getElementById('facturacion-otro').focus();
+        } else {
+          container.style.display = 'none';
+        }
+      });
+    });
+
+    // Validation
+    function validate() {
+      let ok = true;
+
+      const nombre = document.getElementById('nombre').value.trim();
+      document.getElementById('err-nombre').textContent = '';
+      document.getElementById('nombre').classList.remove('invalid');
+      if (!nombre) {
+        document.getElementById('err-nombre').textContent = 'Por favor, dinos tu nombre.';
+        document.getElementById('nombre').classList.add('invalid');
+        ok = false;
+      }
+
+      const tel = document.getElementById('telefono').value.trim();
+      document.getElementById('err-telefono').textContent = '';
+      document.getElementById('telefono').classList.remove('invalid');
+      if (!tel) {
+        document.getElementById('err-telefono').textContent = 'Incluye tu número con prefijo.';
+        document.getElementById('telefono').classList.add('invalid');
+        ok = false;
+      }
+
+      const obj = document.getElementById('objetivo').value.trim();
+      document.getElementById('err-objetivo').textContent = '';
+      document.getElementById('objetivo').classList.remove('invalid');
+      if (!obj) {
+        document.getElementById('err-objetivo').textContent = 'Cuéntanos tu objetivo.';
+        document.getElementById('objetivo').classList.add('invalid');
+        ok = false;
+      }
+
+      const frenos = document.getElementById('frenos').value.trim();
+      document.getElementById('err-frenos').textContent = '';
+      document.getElementById('frenos').classList.remove('invalid');
+      if (!frenos) {
+        document.getElementById('err-frenos').textContent = 'Este campo es importante, no te lo saltes.';
+        document.getElementById('frenos').classList.add('invalid');
+        ok = false;
+      }
+
+      const fact = document.querySelector('input[name="facturacion"]:checked');
+      document.getElementById('err-facturacion').textContent = '';
+      if (!fact) {
+        document.getElementById('err-facturacion').textContent = 'Selecciona una opción.';
+        ok = false;
+      } else if (fact.value === 'otro') {
+        const otro = document.getElementById('facturacion-otro').value.trim();
+        if (!otro) {
+          document.getElementById('err-facturacion').textContent = 'Especifica tu situación.';
+          document.getElementById('facturacion-otro').classList.add('invalid');
+          ok = false;
+        }
+      }
+
+      const mejoras = document.getElementById('mejoras').value.trim();
+      document.getElementById('err-mejoras').textContent = '';
+      document.getElementById('mejoras').classList.remove('invalid');
+      if (!mejoras) {
+        document.getElementById('err-mejoras').textContent = 'Cuéntanos qué necesita mejorar.';
+        document.getElementById('mejoras').classList.add('invalid');
+        ok = false;
+      }
+
+      return ok;
+    }
+
+    // Submit
+    document.getElementById('mainForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!validate()) return;
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      // Simulate send — replace with your actual endpoint
+      setTimeout(() => {
+        document.getElementById('mainForm').style.display = 'none';
+        document.querySelector('.section-desc').style.display = 'none';
+        document.querySelector('.section-label').style.display = 'none';
+        document.querySelector('.section-title').style.display = 'none';
+        document.getElementById('successScreen').classList.add('active');
+        window.scrollTo({ top: document.getElementById('formulario').offsetTop - 40, behavior: 'smooth' });
+      }, 900);
+    });
+  </script>
+</body>
+</html>
